@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RSpec::Snapshot::VERSION do
+describe RSpec::ImageSnapshot::VERSION do
   it 'is set to 2.0.1' do
     expect(subject).to eq('2.0.1')
   end

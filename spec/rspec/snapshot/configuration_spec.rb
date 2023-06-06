@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RSpec::Snapshot::Configuration do
+describe RSpec::ImageSnapshot::Configuration do
   describe '.initialize_configuration' do
     let(:rspec_configuration) { object_double(RSpec.configuration) }
 

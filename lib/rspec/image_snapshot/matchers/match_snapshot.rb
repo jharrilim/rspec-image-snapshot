@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 require 'fileutils'
-require 'rspec/snapshot/default_serializer'
+require 'rspec/image_snapshot/default_serializer'
+require 'mini_magick'
 
 module RSpec
-  module Snapshot
+  module ImageSnapshot
     module Matchers
       # RSpec matcher for snapshot testing
       class MatchSnapshot
@@ -15,7 +16,9 @@ module RSpec
           @snapshot_name = snapshot_name
           @config = config
           @serializer = serializer_class.new
-          @snapshot_path = File.join(snapshot_dir, "#{@snapshot_name}.snap")
+          @snapshot_path = File.join(snapshot_dir, @snapshot_name)
+          @pending_snapshot_path = File.join(snapshot_dir,
+                                             "pending_#{@snapshot_name}")
           create_snapshot_dir
         end
 
@@ -50,7 +53,15 @@ module RSpec
 
           @expected = read_snapshot
 
-          @actual == @expected
+          matches = @actual == @expected
+
+          if matches
+            File.delete(@pending_snapshot_path) if pending_review?
+          else
+            @actual.write(@pending_snapshot_path)
+          end
+
+          matches
         end
 
         # === is the method called when matching an argument
@@ -58,7 +69,7 @@ module RSpec
         alias match matches?
 
         private def serialize(value)
-          return value if value.is_a?(String)
+          return value if value.is_a?(MiniMagick::Image)
 
           @serializer.dump(value)
         end
@@ -69,40 +80,39 @@ module RSpec
           RSpec.configuration.reporter.message(
             "Snapshot written: #{@snapshot_path}"
           )
-          file = File.new(@snapshot_path, 'w+')
-          file.write(@actual)
-          file.close
+          @actual.write(@snapshot_path)
         end
 
         private def should_write?
           update_snapshots? || !File.exist?(@snapshot_path)
         end
 
+        private def pending_review?
+          File.exist?(@pending_snapshot_path)
+        end
+
         private def update_snapshots?
-          ENV['UPDATE_SNAPSHOTS']
+          ENV.fetch('UPDATE_SNAPSHOTS', nil)
         end
 
         private def read_snapshot
-          file = File.new(@snapshot_path)
-          value = file.read
-          file.close
-          value
+          MiniMagick::Image.open(@snapshot_path)
         end
 
         def description
-          "to match a snapshot containing: \"#{@expected}\""
+          "to match a snapshot against the image: \"#{@snapshot_path}\""
         end
 
         def diffable?
-          true
+          false
         end
 
         def failure_message
-          "\nexpected: #{@expected}\n     got: #{@actual}\n"
+          "Snapshot did not match. Review #{@pending_snapshot_path}"
         end
 
         def failure_message_when_negated
-          "\nexpected: #{@expected} not to match #{@actual}\n"
+          "Snapshot did not match. Review #{@pending_snapshot_path}"
         end
       end
     end

@@ -8,7 +8,7 @@ AllCops:
     - "Rakefile"
     - "bin/**/*"
     - "spec/fixtures/**/*"
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 2.6
 
 Layout/EmptyLinesAroundAttributeAccessor:
   Enabled: true
@@ -56,6 +56,7 @@ RSpec/MessageSpies:
   Enabled: true
 RSpec/MultipleExpectations:
   Enabled: true
+  Max: 3
 RSpec/MultipleMemoizedHelpers:
   Enabled: false
 RSpec/NamedSubject:
@@ -68,7 +69,6 @@ RSpec/SubjectStub:
   Enabled: true
 RSpec/VerifiedDoubles:
   Enabled: true
-
 Style/AccessModifierDeclarations:
   Enabled: false # Disabled since we follow Clean Code's newspaper code structure
 Style/DoubleNegation:

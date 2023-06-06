@@ -1,22 +1,26 @@
-# RSpec::Snapshot [![Build Status](https://travis-ci.com/levinmr/rspec-snapshot.svg?branch=master)](https://travis-ci.com/levinmr/rspec-snapshot)
+# RSpec::ImageSnapshot
 
-Adds snapshot testing to RSpec, inspired by [Jest](https://jestjs.io/).
+Adds image snapshot testing to Rspec which work on `MiniMagick::Image`s.
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'rspec-snapshot'
+gem 'rspec-image-snapshot'
 ```
 
 And then execute:
 
-    $ bundle install
+```shell
+bundle install
+```
 
 Or install it yourself as:
 
-    $ gem install rspec-snapshot
+```shell
+gem install rspec-snapshot
+```
 
 ## Usage
 
@@ -25,48 +29,30 @@ a snapshot name as an argument like:
 
 ```ruby
 # match_snapshot
-expect(generated_email).to match_snapshot('welcome_email')
+expect(image).to match_snapshot('resized-image.jpg')
 
 # match argument with snapshot
-expect(logger).to have_received(:info).with(snapshot('log message'))
+expect(formatter).to have_received(:image).with(snapshot('input.png'))
 ```
 
 When a test is run using a snapshot matcher and a snapshot file does not exist
-matching the passed name, the test value encountered will be serialized and
-stored in your snapshot directory as the file: `#{snapshot_name}.snap`
+matching the passed name, the test value encountered will be stored in your
+snapshot directory as the file: `#{snapshot_name}`.
 
 When a test is run using a snapshot matcher and a snapshot file exists matching
 the passed name, then the test value encountered will be serialized and
 compared to the snapshot file contents. If the values match your test passes,
 otherwise it fails.
 
-### Rails request testing
+### Testing that an image matches a snapshot
 
 ```ruby
-RSpec.describe 'Posts', type: :request do
-  describe 'GET /posts' do
-    it 'returns a list of post' do
-      get posts_path
-
-      expect(response.body).to match_snapshot('get_posts')
+RSpec.describe MyImageProcessor do
+  describe '#process' do
+    it 'generates a thumbnail' do
+      image = subject.process('path/to/image.png')
+      expect(image).to match_snapshot('thumbnail')
     end
-  end
-end
-```
-
-### Rails view testing
-
-```ruby
-RSpec.describe 'widgets/index', type: :view do
-  it 'displays all the widgets' do
-    assign(:widgets, [
-      Widget.create!(:name => 'slicer'),
-      Widget.create!(:name => 'dicer')
-    ])
-
-    render
-
-    expect(rendered).to match_snapshot('widgets/index')
   end
 end
 ```
@@ -79,11 +65,15 @@ test command.
 
 Update all snapshots
 
-    $ UPDATE_SNAPSHOTS=true bundle exec rspec
+```shell
+UPDATE_SNAPSHOTS=true bundle exec rspec
+```
 
 Update snapshots for some subset of tests
 
-    $ UPDATE_SNAPSHOTS=true bundle exec rspec spec/foo/bar
+```shell
+UPDATE_SNAPSHOTS=true bundle exec rspec spec/foo/bar
+```
 
 ## Configuration
 
@@ -97,62 +87,35 @@ RSpec.configure do |config|
   #
   # Set this value to put all snapshots in a fixed directory
   config.snapshot_dir = "spec/fixtures/snapshots"
-
-  # Defaults to using the awesome_print gem to serialize values for snapshots
-  #
-  # Set this value to use a custom snapshot serializer
-  config.snapshot_serializer = MyFavoriteSerializer
 end
 ```
-
-### Custom serializers
-
-By default, values to be stored as snapshots are serialized to human readable
-string form using the [awesome_print](https://github.com/awesome-print/awesome_print) gem.
-
-You can pass custom serializers to `rspec-snapshot` if you prefer. Pass a serializer class name to the global RSpec config, or to an individual
-matcher as a config option:
-
-```ruby
-# Set a custom serializer for all tests
-RSpec.configure do |config|
-  config.snapshot_serializer = MyCoolGeneralSerializer
-end
-
-# Set a custom serializer for this specific test
-expect(html_response).to(
-  match_snapshot('html_response', { snapshot_serializer: MyAwesomeHTMLSerializer })
-)
-```
-
-Serializer classes are required to have one instance method `dump` which takes
-the value to be serialized and returns a string.
-
-## Migration
-
-If you're updating to version 2.x.x from 1.x.x, you may need to update all your existing snapshots since the serialization method has changed.
-
-    $ UPDATE_SNAPSHOTS=true bundle exec rspec
 
 ## Development
 
 ### Initial Setup
 
-Install a current version of ruby (> 2.5) and bundler. Then install gems
+Install a current version of ruby (> 2.6) and bundler. Then install gems
 
-    $ bundle install
+```shell
+bundle install
+```
 
 ### Linting
 
-    $ bundle exec rubocop
-
+```shell
+bundle exec rubocop
+```
 ### Unit tests
 
-    $ bundle exec rspec
+```shell
+bundle exec rspec
+```
 
 ### Interactive console with the gem code loaded
 
-    $ bin/console
+```shell
+bin/console
+```
 
 ### Rake commands
 
@@ -163,6 +126,7 @@ git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygem
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/levinmr/rspec-snapshot.
+Bug reports and pull requests are welcome on GitHub at
+[https://github.com/jharrilim/rspec-image-snapshot](https://github.com/jharrilim/rspec-image-snapshot).
 
-A big thanks to the original author [@yesmeck](https://github.com/yesmeck).
+A big thanks to the original author [@yesmeck](https://github.com/yesmeck) and [@levinmr](https://github.com/levinmr).

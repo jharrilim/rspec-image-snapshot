@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'rspec/snapshot/matchers/match_snapshot'
+require 'rspec/image_snapshot/matchers/match_snapshot'
 
 module RSpec
-  module Snapshot
+  module ImageSnapshot
     # rubocop:disable Style/Documentation
     module Matchers
       def match_snapshot(snapshot_name, config = {})
@@ -19,5 +19,5 @@ module RSpec
 end
 
 RSpec.configure do |config|
-  config.include RSpec::Snapshot::Matchers
+  config.include RSpec::ImageSnapshot::Matchers
 end

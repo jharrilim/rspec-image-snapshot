@@ -2,20 +2,20 @@
 
 require 'spec_helper'
 
-describe RSpec::Snapshot::DefaultSerializer do
+describe RSpec::ImageSnapshot::DefaultSerializer do
   subject { described_class.new }
 
   describe '#dump' do
-    let(:object_param) { Object.new }
-    let(:expected) { 'foobar' }
+    let(:param) { 'some/fake/path' }
+    let(:expected) { instance_double(MiniMagick::Image) }
 
     before do
-      allow(object_param).to receive(:ai).and_return(expected)
-      @actual = subject.dump(object_param)
+      allow(MiniMagick::Image).to receive(:open).and_return(expected)
+      @actual = subject.dump(param)
     end
 
-    it 'calls .ai on the object to serialize with awesome_print' do
-      expect(object_param).to have_received(:ai).with(plain: true, indent: 2)
+    it 'calls .open on MiniMagick::Image with the param' do
+      expect(MiniMagick::Image).to have_received(:open).with(param)
     end
 
     it 'returns the result from awesome_print' do
